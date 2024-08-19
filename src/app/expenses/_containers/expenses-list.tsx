@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -37,7 +36,6 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
   const loadMorePosts = async () => {
     const apiPosts = await fetchExpences(page, 30);
 
-    console.log("API Posts ->", apiPosts);
     setExpenses((prevPosts) => [...prevPosts, ...apiPosts.expenses]);
     setPage((prevOffset) => prevOffset + 1);
   };
@@ -52,7 +50,6 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
     <>
       <section className="h-[400px] overflow-y-scroll">
         <Table>
-          <TableCaption></TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[150px]">Expence Date</TableHead>
