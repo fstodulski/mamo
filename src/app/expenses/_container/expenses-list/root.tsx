@@ -63,8 +63,7 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
   };
 
   useEffect(() => {
-    console.log(data.expenses);
-    // updateExpenses(data.expenses);
+    updateExpenses(data.expenses);
     updateCurrentPage(+data.pagination.currentPage);
   }, []);
 
