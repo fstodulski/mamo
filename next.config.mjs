@@ -1,6 +1,16 @@
+import MillionLint from "@million/lint";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	ignoreDuringBuilds: true, // to skip eslint on build, we have biome to take care of it
+  ignoreDuringBuilds: true, // to skip eslint on build, we have biome to take care of it
 };
 
-export default nextConfig;
+const withMillionLint = MillionLint.next({
+  rsc: true,
+  optimizeDOM: true,
+})(nextConfig);
+
+// Set MillionLint only on dev
+const config =
+  preocess.env.NODE_ENV !== "production" ? withMillionLint : nextConfig;
+
+export default config;
