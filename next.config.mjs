@@ -11,6 +11,6 @@ const withMillionLint = MillionLint.next({
 
 // Set MillionLint only on dev
 const config =
-  preocess.env.NODE_ENV !== "production" ? withMillionLint : nextConfig;
+  process.env.NODE_ENV !== "production" ? withMillionLint : nextConfig;
 
 export default config;
