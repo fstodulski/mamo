@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { fetchExpences } from "@/lib/actions/fetch-expences";
 import type { Expenses } from "@/lib/schemas/expense.schema";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 
@@ -28,6 +29,7 @@ export type ExpensesListProps = {
   };
 };
 export const ExpensesList = ({ data }: ExpensesListProps) => {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const { ref, inView } = useInView();
   const [expenses, setExpenses] = useState<Expenses>(data.expenses);
@@ -36,8 +38,12 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
   const loadMorePosts = async () => {
     const apiPosts = await fetchExpences(page, 30);
 
+    if (!apiPosts.pagination.hasMore) return;
+
     setExpenses((prevPosts) => [...prevPosts, ...apiPosts.expenses]);
     setPage((prevOffset) => prevOffset + 1);
+
+    router.push(`/expenses?page=${page}&limit=30`, { scroll: false });
   };
 
   useEffect(() => {
