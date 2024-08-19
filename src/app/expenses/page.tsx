@@ -2,7 +2,6 @@
 
 import { ExpensesList } from "@/app/expenses/_container/expenses-list/root";
 import { fetchExpensesAction } from "@/lib/actions/fetch-expenses.action";
-import { Suspense } from "react";
 
 export type ExpensesProps = {
   searchParams: {
@@ -14,13 +13,9 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
 
   const expenses = await fetchExpensesAction(page);
 
-  console.log(expenses.expenses.length);
-
   return (
     <div className="container">
-      <Suspense fallback={<div>Loading...</div>}>
-        <ExpensesList data={expenses} />
-      </Suspense>
+      <ExpensesList data={expenses} />
     </div>
   );
 }

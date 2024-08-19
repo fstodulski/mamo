@@ -5,7 +5,7 @@ import { fetchExpensesAction } from "@/lib/actions/fetch-expenses.action";
 import type { Expense } from "@/lib/models/expense.model";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
@@ -20,43 +20,51 @@ export type ExpensesListProps = {
     };
   };
 };
-export const ExpensesList = ({ data }: ExpensesListProps) => {
+export const ExpensesList = memo(({ data }: ExpensesListProps) => {
   const router = useRouter();
 
   const {
     isLoading,
+    pagination,
     limit,
-    hasMore,
     setIsLoading,
+    updatePagination,
     updateExpenses,
-    currentPage,
-    updateCurrentPage,
-    incrementCurrentPage,
-    updateHasMore,
-    expenses: expensesStore,
+    expenses,
   } = useExpensesListStore();
 
   const { ref, inView } = useInView({
     threshold: 0.5,
   });
 
-  const isEmpty = useMemo(() => expensesStore.length === 0, [expensesStore]);
+  const isEmpty = useMemo(() => expenses.length === 0, [expenses]);
 
   const handleLoadMore = async () => {
     setIsLoading(true);
-    if (!data.pagination.hasNextPage) {
-      updateHasMore(false);
+
+    const result = await fetchExpensesAction(pagination.currentPage);
+
+    if (!result.pagination.hasNextPage) {
+      updatePagination({
+        hasNextPage: false,
+        currentPage: +result.pagination.currentPage,
+      });
+
+      setIsLoading(false);
       toast.info("No more data");
+
       return;
     }
 
-    const expenses = await fetchExpensesAction(currentPage);
+    if (result.expenses.length > 0) {
+      const newArray = [...expenses, ...result.expenses];
+      updateExpenses(newArray);
+      updatePagination({
+        hasNextPage: result.pagination.hasNextPage,
+        currentPage: +result.pagination.currentPage + 1,
+      });
 
-    if (expenses.expenses.length > 0) {
-      updateExpenses([...expensesStore, ...expenses.expenses]);
-
-      updateHasMore(expenses.pagination.hasNextPage);
-      router.push(`/expenses?page=${+currentPage}&limit=${limit}`);
+      router.push(`/expenses?page=${+pagination.currentPage}&limit=${limit}`);
     }
 
     setIsLoading(false);
@@ -64,12 +72,21 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
 
   useEffect(() => {
     updateExpenses(data.expenses);
-    updateCurrentPage(+data.pagination.currentPage);
+
+    updatePagination({
+      totalElements: data.pagination.totalElements,
+      currentPage: +data.pagination.currentPage,
+      limit: limit,
+      hasNextPage: data.pagination.hasNextPage,
+    });
+
+    return () => {
+      updateExpenses([]);
+    };
   }, []);
 
   useEffect(() => {
     if (inView) {
-      incrementCurrentPage();
       handleLoadMore();
     }
   }, [inView]);
@@ -83,7 +100,7 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
         })}
       >
         {!isEmpty &&
-          expensesStore.map((expense) => (
+          expenses.map((expense) => (
             <>
               <div
                 key={`${expense.id}`}
@@ -99,7 +116,7 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
             </>
           ))}
 
-        {!isEmpty && hasMore && (
+        {!isEmpty && pagination.hasNextPage && (
           <span ref={ref} className="text-center text-xs">
             Load More...
           </span>
@@ -107,4 +124,6 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
       </div>
     </div>
   );
-};
+});
+
+ExpensesList.displayName = "ExpensesList";
