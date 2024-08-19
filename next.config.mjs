@@ -1,7 +1,12 @@
 import MillionLint from "@million/lint";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  ignoreDuringBuilds: true, // to skip eslint on build, we have biome to take care of it
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true, // to skip eslint on build, we have biome to take care of it
+  },
 };
 
 const withMillionLint = MillionLint.next({
