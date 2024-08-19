@@ -38,7 +38,10 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
   const loadMorePosts = async () => {
     const apiPosts = await fetchExpences(page, 30);
 
-    if (!apiPosts.pagination.hasNextPage) return;
+    if (!apiPosts.pagination.hasNextPage) {
+      setHasMoreData(false);
+      return;
+    }
 
     setExpenses((prevPosts) => [...prevPosts, ...apiPosts.expenses]);
     setPage((prevOffset) => prevOffset + 1);
@@ -76,9 +79,11 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
           </TableBody>
         </Table>
 
-        <Button ref={ref} className="w-full">
-          Loading more...
-        </Button>
+        {hasMoreData && (
+          <Button ref={ref} className="w-full">
+            Loading more...
+          </Button>
+        )}
       </section>
     </>
   );
