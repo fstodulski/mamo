@@ -14,6 +14,8 @@ export default async function ExpensesPage({
 
   const expenses = await fetchExpences(page, limit);
 
+  console.log("expenses", expenses);
+
   return (
     <main className="container">
       <ExpensesList data={expenses} />

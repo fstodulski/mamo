@@ -30,7 +30,7 @@ export type ExpensesListProps = {
 };
 export const ExpensesList = ({ data }: ExpensesListProps) => {
   const router = useRouter();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(+data.pagination.currentPage);
   const { ref, inView } = useInView();
   const [expenses, setExpenses] = useState<Expenses>(data.expenses);
   const [hasMoreData, setHasMoreData] = useState(true);
@@ -38,7 +38,7 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
   const loadMorePosts = async () => {
     const apiPosts = await fetchExpences(page, 30);
 
-    if (!apiPosts.pagination.hasMore) return;
+    if (!apiPosts.pagination.hasNextPage) return;
 
     setExpenses((prevPosts) => [...prevPosts, ...apiPosts.expenses]);
     setPage((prevOffset) => prevOffset + 1);

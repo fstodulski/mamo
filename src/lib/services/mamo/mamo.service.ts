@@ -8,7 +8,6 @@ export class MamoService extends Service {
    *
    */
   public async createProductPaymentLink(data: BuyProduct) {
-    console.log(`Bearer ${envServer.MAMO_PRIVATE_SDK_KEY}`);
     const response = await mamopay
       .auth(`Bearer ${envServer.MAMO_PRIVATE_SDK_KEY}`)
       .postLinks({
