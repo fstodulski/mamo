@@ -37,9 +37,8 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
   const loadMorePosts = async () => {
     const apiPosts = await fetchExpences(page, 30);
 
-    console.log(apiPosts);
-
-    setExpenses((prevPosts) => [...prevPosts, ...apiPosts.expences]);
+    console.log("API Posts ->", apiPosts);
+    setExpenses((prevPosts) => [...prevPosts, ...apiPosts.expenses]);
     setPage((prevOffset) => prevOffset + 1);
   };
 
@@ -64,9 +63,7 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
           </TableHeader>
           <TableBody>
             {expenses.map((expense) => (
-              <TableRow
-                key={`${expense.id}-${expense.date}-${new Date().getTime()}`}
-              >
+              <TableRow key={`${expense.id}-${expense.date}`}>
                 <TableCell className="font-medium">{expense.date}</TableCell>
                 <TableCell>{expense.status}</TableCell>
                 <TableCell>{expense.paymentMethod}</TableCell>
