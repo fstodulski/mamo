@@ -5,9 +5,15 @@ import { fetchExpensesAction } from "@/lib/actions/fetch-expenses.action";
 import type { Expense } from "@/lib/models/expense.model";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { memo, useEffect, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
+
+const mapExpenses = (expenses: Expense[]) =>
+  expenses.map((expense) => ({
+    ...expense,
+    id: Date.now().toString(36),
+  }));
 
 export type ExpensesListProps = {
   data: {
@@ -39,39 +45,55 @@ export const ExpensesList = memo(({ data }: ExpensesListProps) => {
 
   const isEmpty = useMemo(() => expenses.length === 0, [expenses]);
 
-  const handleLoadMore = async () => {
-    setIsLoading(true);
+  const handleLoadMore = useCallback(async () => {
+    try {
+      setIsLoading(true);
 
-    const result = await fetchExpensesAction(pagination.currentPage);
+      const result = await fetchExpensesAction(pagination.currentPage);
 
-    if (!result.pagination.hasNextPage) {
-      updatePagination({
-        hasNextPage: false,
-        currentPage: +result.pagination.currentPage,
-      });
+      if (!result.pagination.hasNextPage) {
+        updatePagination({
+          hasNextPage: false,
+          currentPage: +result.pagination.currentPage,
+        });
+
+        setIsLoading(false);
+        toast.info("No more data");
+
+        return;
+      }
+
+      if (result.expenses.length > 0) {
+        const newArray = [...expenses, ...mapExpenses(result.expenses)];
+        updateExpenses(newArray);
+        updatePagination({
+          hasNextPage: result.pagination.hasNextPage,
+          currentPage: +result.pagination.currentPage + 1,
+        });
+
+        router.replace(
+          `/expenses?page=${+pagination.currentPage}&limit=${limit}`,
+          { scroll: false },
+        );
+      }
 
       setIsLoading(false);
-      toast.info("No more data");
-
-      return;
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Failed to load more expenses.");
     }
-
-    if (result.expenses.length > 0) {
-      const newArray = [...expenses, ...result.expenses];
-      updateExpenses(newArray);
-      updatePagination({
-        hasNextPage: result.pagination.hasNextPage,
-        currentPage: +result.pagination.currentPage + 1,
-      });
-
-      router.push(`/expenses?page=${+pagination.currentPage}&limit=${limit}`);
-    }
-
-    setIsLoading(false);
-  };
+  }, [
+    pagination,
+    expenses,
+    router,
+    limit,
+    updateExpenses,
+    updatePagination,
+    setIsLoading,
+  ]);
 
   useEffect(() => {
-    updateExpenses(data.expenses);
+    updateExpenses(mapExpenses(data.expenses));
 
     updatePagination({
       totalElements: data.pagination.totalElements,
@@ -83,13 +105,13 @@ export const ExpensesList = memo(({ data }: ExpensesListProps) => {
     return () => {
       updateExpenses([]);
     };
-  }, []);
+  }, [data, limit, updateExpenses, updatePagination]);
 
   useEffect(() => {
     if (inView) {
       handleLoadMore();
     }
-  }, [inView]);
+  }, [inView, handleLoadMore]);
 
   return (
     <div className=" w-full pt-20">
