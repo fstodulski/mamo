@@ -63,7 +63,8 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
   };
 
   useEffect(() => {
-    updateExpenses(data.expenses);
+    console.log(data.expenses);
+    // updateExpenses(data.expenses);
     updateCurrentPage(+data.pagination.currentPage);
   }, []);
 
@@ -99,7 +100,11 @@ export const ExpensesList = ({ data }: ExpensesListProps) => {
             </>
           ))}
 
-        {!isEmpty && hasMore && <span ref={ref}>Load More</span>}
+        {!isEmpty && hasMore && (
+          <span ref={ref} className="text-center text-xs">
+            Load More...
+          </span>
+        )}
       </div>
     </div>
   );

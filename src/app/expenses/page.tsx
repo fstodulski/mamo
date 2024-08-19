@@ -14,6 +14,8 @@ export default async function Expenses({ searchParams }: ExpensesProps) {
 
   const expenses = await fetchExpensesAction(page);
 
+  console.log(expenses.expenses.length);
+
   return (
     <div className="container">
       <Suspense fallback={<div>Loading...</div>}>
